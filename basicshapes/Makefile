@@ -7,7 +7,7 @@ SRCS = main.cpp
 ifeq ($(shell uname),Darwin)
 	LIBS = -framework OpenGL -framework GLUT
 else
-	LIBS = -lglut
+	LIBS = -lGL -lGLU -lglut
 endif
 
 all: $(PROG)

@@ -35,6 +35,9 @@
 
 using namespace std;
 
+float _angle = 30.0f;
+float _camera_angle = 0.0f;
+
 //Called when a key is pressed
 void handleKeypress(unsigned char key, //The key that was pressed
 					int x, int y) {    //The current mouse coordinates
@@ -48,6 +51,21 @@ void handleKeypress(unsigned char key, //The key that was pressed
 void initRendering() {
 	//Makes 3D drawing work when something is in front of something else
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_COLOR_MATERIAL);
+    glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
+}
+
+void update(int value){
+    _angle += 2.0f;
+    if (_angle > 360.0f) {
+        _angle -= 360.0f;
+    }
+    _camera_angle += 0.5f;
+    if (_camera_angle > 360.0f){
+        _camera_angle -= 360.0f;
+    }
+    glutPostRedisplay();
+    glutTimerFunc(25, update, 0);
 }
 
 //Called when the window is resized
@@ -72,39 +90,78 @@ void drawScene() {
 	
 	glMatrixMode(GL_MODELVIEW); //Switch to the drawing perspective
 	glLoadIdentity(); //Reset the drawing perspective
-	
-	glBegin(GL_QUADS); //Begin quadrilateral coordinates
-	
-	//Trapezoid
-	glVertex3f(-0.7f, -1.5f, -5.0f);
-	glVertex3f(0.7f, -1.5f, -5.0f);
-	glVertex3f(0.4f, -0.5f, -5.0f);
-	glVertex3f(-0.4f, -0.5f, -5.0f);
-	
-	glEnd(); //End quadrilateral coordinates
-	
+    glRotatef(_angle, 0.1f, -0.1f, 1.0f);
+    glScalef(0.5f, 0.5f, 0.5f);
+    glTranslatef(0.0f, 0.0f, -5.0f);
+
+    glPushMatrix();
+    glTranslatef(0.0f, -1.0, 0.0f);
+    glRotatef(_angle, 0.0f, 0.0f, 1.0f);
+    
+    glColor3f(0.0f, 0.75f, 0.0f);
 	glBegin(GL_TRIANGLES); //Begin triangle coordinates
+	glVertex3f(-0.7f, -0.5f, 0.0f);
+	glVertex3f(0.7f, -0.5f, 0.0f);
+	glVertex3f(-0.4f, 0.5f, 0.0f);
+
+    glVertex3f(0.7f, -0.5f, 0.0f);
+	glVertex3f(0.4f, 0.5f, 0.0f);
+	glVertex3f(-0.4f, 0.5f, 0.0f);
+	glEnd();
+
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(0.0f, 0.0f, -2.0f);
+    glRotatef(_angle, 0.0f, 1.0f, 0.0f);
+    glScalef(0.7f, 0.7f, 0.7f);
+    
+    glColor3f(0.75f, 0.0f, 0.0f);
+    glBegin(GL_QUADS); //Begin quadrilateral coordinates
+    glVertex3f(-0.4f, -0.5f, 0.0f);
+    glVertex3f(+0.6f, -0.5f, 0.0f);
+    glVertex3f(+0.4f, +0.5f, 0.0f);
+    glVertex3f(-0.6f, +0.5f, 0.0f);
+
+	glEnd(); //End quadrilateral coordinates
+	glPopMatrix();
+    glPushMatrix();
+    glScalef(0.7f, 0.7f, 0.7f);
+    glPushMatrix();
+    glTranslatef(1.0f, 1.0f, 1.0f);
+
+    glColor3f(0.0f, 0.0f, 0.7f);
+	glBegin(GL_TRIANGLES); //Begin triangle coordinates
+	glVertex3f(-0.5f, -0.5f, 0.0f);
+	glVertex3f(0.5f, -0.5f, 0.0f);
+	glVertex3f(-0.5f, 0.0f, 0.0f);
 	
-	//Pentagon
-	glVertex3f(0.5f, 0.5f, -5.0f);
-	glVertex3f(1.5f, 0.5f, -5.0f);
-	glVertex3f(0.5f, 1.0f, -5.0f);
+	glVertex3f(-0.5f, 0.0f, 0.0f);
+	glVertex3f(0.5f, -0.5f, 0.0f);
+	glVertex3f(0.5f, 0.0f, 0.0f);
 	
-	glVertex3f(0.5f, 1.0f, -5.0f);
-	glVertex3f(1.5f, 0.5f, -5.0f);
-	glVertex3f(1.5f, 1.0f, -5.0f);
-	
-	glVertex3f(0.5f, 1.0f, -5.0f);
-	glVertex3f(1.5f, 1.0f, -5.0f);
-	glVertex3f(1.0f, 1.5f, -5.0f);
-	
+	glVertex3f(-0.5f, 0.0f, 0.0f);
+	glVertex3f(0.5f, 0.0f, 0.0f);
+	glVertex3f(0.0f, 0.5f, 0.0f);
+    glEnd();
+
+    glPopMatrix();
+    glPushMatrix();
+    glTranslatef(-1.0f, 1.0f, 0.0f);
+    glRotatef(_angle, 1.0f, 2.0f, 3.0f);
+
+    glBegin(GL_TRIANGLES);
 	//Triangle
-	glVertex3f(-0.5f, 0.5f, -5.0f);
-	glVertex3f(-1.0f, 1.5f, -5.0f);
-	glVertex3f(-1.5f, 0.5f, -5.0f);
+	glColor3f(1.0f, 0.0f, 0.0f);
+    glVertex3f(0.5f, -0.5f, 0.0f);
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0.0f, 0.5f, 0.0f);
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(-0.5f, -0.5f, 0.0f);
 	
 	glEnd(); //End triangle coordinates
-	
+	glPopMatrix();
+    glPopMatrix();
+    
 	glutSwapBuffers(); //Send the 3D scene to the screen
 }
 
@@ -120,7 +177,8 @@ int main(int argc, char** argv) {
 	
 	//Set handler functions for drawing, keypresses, and window resizes
 	glutDisplayFunc(drawScene);
-	glutKeyboardFunc(handleKeypress);
+	glutTimerFunc(25, update, 0);
+    glutKeyboardFunc(handleKeypress);
 	glutReshapeFunc(handleResize);
 	
 	glutMainLoop(); //Start the main loop.  glutMainLoop doesn't return.
