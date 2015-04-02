@@ -37,13 +37,36 @@ using namespace std;
 
 float _angle = 30.0f;
 float _camera_angle = 0.0f;
+float _light_pos = 0.0f;
+float _light_move = 0.02f;
+bool _lightsOn = true;
+bool _smooth = true;
 
 //Called when a key is pressed
-void handleKeypress(unsigned char key, //The key that was pressed
-					int x, int y) {    //The current mouse coordinates
+void handleKeypress(unsigned char key, int x, int y) {
 	switch (key) {
 		case 27: //Escape key
 			exit(0); //Exit the program
+        case 'l': //L key
+            if(_lightsOn){
+                glDisable(GL_LIGHTING);
+                _lightsOn = false;
+            } else {
+                glEnable(GL_LIGHTING);
+                _lightsOn = true;
+            }
+            break;
+        case 's':
+            if(_smooth){
+                glDisable(GL_SMOOTH);
+                _smooth = false;
+            } else {
+                glEnable(GL_SMOOTH);
+                _smooth = true;
+            }
+            break;
+        default:
+            break;
 	}
 }
 
@@ -54,9 +77,11 @@ void initRendering() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHT2);
+    glEnable(GL_SMOOTH);
     glEnable(GL_NORMALIZE);
     glEnable(GL_COLOR_MATERIAL);
-    glClearColor(0.6f, 0.8f, 1.0f, 1.0f);
+    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 }
 
 void update(int value){
@@ -67,6 +92,10 @@ void update(int value){
     _camera_angle += 0.5f;
     if (_camera_angle > 360.0f){
         _camera_angle -= 360.0f;
+    }
+    _light_pos += _light_move;
+    if (_light_pos > 4.0f || _light_pos < -4.0f) {
+        _light_move = - _light_move;
     }
     glutPostRedisplay();
     glutTimerFunc(25, update, 0);
@@ -85,46 +114,70 @@ void drawScene() {
 	//Clear information from last draw
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    GLfloat ambientColor[] = {0.2f, 0.2f, 0.2f, 1.0f};
+    GLfloat ambientColor[] = {0.1f, 0.1f, 0.1f, 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientColor);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-
+    
     glTranslatef(0.0f, 0.0f, -9.0f);
-    glRotatef(_angle, 0.0f, 1.0f, 0.0f);
-    //glScalef(0.5f, 0.5f, 0.5f);
+
+    GLfloat posLight[] = {0.6f, 0.0f, 0.0f, 1.0f};
+    GLfloat position[] = {2.0f, 0.0f, 0.0f, 1.0f};
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, posLight);
+    glLightfv(GL_LIGHT0, GL_POSITION, position);
+
+    GLfloat dirLight[] = {0.0f, 0.0f, 0.6f, 1.0f};
+    GLfloat dirrection[] = {-1.0f, 0.5f, 0.5f, 0.0f};
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, dirLight);
+    glLightfv(GL_LIGHT1, GL_POSITION, dirrection);
+
+    GLfloat moveLight[] = {0.0f, 0.9f, 0.0f, 1.0f};
+    GLfloat movePos[] = {_light_pos, 1.0f, 1.0f, 1.0f};
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, moveLight);
+    glLightfv(GL_LIGHT2, GL_POSITION, movePos);
+
+    glRotatef(_angle, 0.1f, 1.0f, 0.0f);
     glPushMatrix();
+    glColor3f( 1.0f, 1.0f, 1.0f);
     
     glBegin(GL_QUADS); // Cube
     
-    glColor3f( 1.0f, 0.0f, 0.0f);
-    glNormal3f( 0.0f, 0.0f, 1.0f);
-    glVertex3f( 1.0f, 1.0f, 1.0f);
-    glVertex3f( 1.0f,-1.0f, 1.0f);
+    glNormal3f(-1.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f,-1.0f, 1.0f);
+    glNormal3f( 1.0f, 0.0f, 1.0f);
+    glVertex3f( 1.0f,-1.0f, 1.0f);
+    glNormal3f( 1.0f, 0.0f, 1.0f);
+    glVertex3f( 1.0f, 1.0f, 1.0f);
+    glNormal3f(-1.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f, 1.0f, 1.0f);
 
-    glColor3f( 0.0f, 1.0f, 0.0f);
+    glNormal3f( 1.0f, 0.0f,-1.0f);
+    glVertex3f( 1.0f,-1.0f,-1.0f);
+    glNormal3f( 1.0f, 0.0f,-1.0f);
+    glVertex3f( 1.0f, 1.0f,-1.0f);
     glNormal3f( 1.0f, 0.0f, 0.0f);
     glVertex3f( 1.0f, 1.0f, 1.0f);
-    glVertex3f( 1.0f, 1.0f,-1.0f);
-    glVertex3f( 1.0f,-1.0f,-1.0f);
+    glNormal3f( 1.0f, 0.0f, 0.0f);
     glVertex3f( 1.0f,-1.0f, 1.0f);
 	
-    glColor3f( 0.0f, 0.0f, 1.0f);
-    glNormal3f( 0.0f, 0.0f,-1.0f);
+    glNormal3f(-1.0f, 0.0f,-1.0f);
+    glVertex3f(-1.0f,-1.0f,-1.0f);
+    glNormal3f(-1.0f, 0.0f,-1.0f);
+    glVertex3f(-1.0f, 1.0f,-1.0f);
+    glNormal3f( 1.0f, 0.0f,-1.0f);
     glVertex3f( 1.0f, 1.0f,-1.0f);
+    glNormal3f( 1.0f, 0.0f,-1.0f);
     glVertex3f( 1.0f,-1.0f,-1.0f);
-    glVertex3f(-1.0f,-1.0f,-1.0f);
-    glVertex3f(-1.0f, 1.0f,-1.0f);
 	
-    glColor3f( 0.5f, 0.5f, 0.5f);
-    glNormal3f(-1.0f, 0.0f, 0.0f);
-    glVertex3f(-1.0f,-1.0f, 1.0f);
+    glNormal3f(-1.0f, 0.0f,-1.0f);
     glVertex3f(-1.0f,-1.0f,-1.0f);
-    glVertex3f(-1.0f, 1.0f,-1.0f);
+    glNormal3f(-1.0f, 0.0f, 1.0f);
+    glVertex3f(-1.0f,-1.0f, 1.0f);
+    glNormal3f(-1.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f, 1.0f, 1.0f);
+    glNormal3f(-1.0f, 0.0f,-1.0f);
+    glVertex3f(-1.0f, 1.0f,-1.0f);
 	
     glEnd(); //End triangle coordinates
 
@@ -151,12 +204,4 @@ int main(int argc, char** argv) {
 	glutMainLoop(); //Start the main loop.  glutMainLoop doesn't return.
 	return 0; //This line is never reached
 }
-
-
-
-
-
-
-
-
 
